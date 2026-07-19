@@ -53,11 +53,40 @@ def _choose_folder_dialog(title):
     return None
 
 
+def _get_project_dir():
+    """Return the directory containing the open CodeSys project, or None."""
+    proj = projects.primary
+    # Try direct .path attribute (most reliable)
+    for attr in ('path', 'file_path', 'project_path', 'project_file'):
+        val = getattr(proj, attr, None)
+        if val and isinstance(val, (str, unicode)):
+            d = os.path.dirname(val)
+            if os.path.isdir(d):
+                return d
+    # Try get_project_info()
+    try:
+        info = proj.get_project_info()
+        vals = getattr(info, 'values', info)
+        for key in ('ProjectPath', 'FilePath', 'Path', 'project_path'):
+            p = vals.get(key) if hasattr(vals, 'get') else getattr(vals, key, None)
+            if p:
+                p = str(p)
+                if os.path.isfile(p):
+                    return os.path.dirname(p)
+                if os.path.isdir(p):
+                    return p
+    except Exception:
+        pass
+    return None
+
+
 def _load_settings():
     """Read .cds-st-sync.json, or return defaults."""
-    # Try: current dir, script dir, then parent of script dir
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    for base in (os.getcwd(), script_dir, os.path.dirname(script_dir)):
+    proj_dir = _get_project_dir()
+    for base in (proj_dir, script_dir, os.path.dirname(script_dir)):
+        if base is None:
+            continue
         path = os.path.join(base, _SETTINGS_FILENAME)
         if os.path.isfile(path):
             try:
@@ -70,10 +99,11 @@ def _load_settings():
 
 
 def _save_settings(settings):
-    """Write .cds-st-sync.json next to this script."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Go up one level to project root (scripts/ → CDS_ST_SYNC/)
-    proj_dir = os.path.dirname(script_dir)
+    """Write .cds-st-sync.json next to the CodeSys project file."""
+    proj_dir = _get_project_dir()
+    if proj_dir is None:
+        # Fallback: save next to scripts
+        proj_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     path = os.path.join(proj_dir, _SETTINGS_FILENAME)
     data = settings.to_dict()
     with open(path, 'w') as fh:
@@ -90,7 +120,9 @@ def main():
     settings = _load_settings()
 
     # 1. Sync directory
-    current = settings.sync_dir or os.path.join(os.getcwd(), 'sync')
+    current = settings.sync_dir or os.path.join(
+        _get_project_dir() or os.getcwd(), 'sync'
+    )
     new_dir = system.ui.query_string(
         'Sync directory path:\n'
         '(press OK to use default, or type a path)',
