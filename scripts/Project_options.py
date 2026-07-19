@@ -107,39 +107,27 @@ def main():
 
 def _load_settings():
     """Read .cds-st-sync.json from the project folder, or return defaults."""
-    try:
-        proj_path = str(projects.primary)
-        proj_dir = os.path.dirname(proj_path.replace('Project: ', ''))
-    except Exception:
+    def _load_settings():
+        """Read .cds-st-sync.json, or return defaults."""
+        for base in (os.getcwd(), os.path.dirname(os.path.abspath(__file__))):
+            path = os.path.join(base, _SETTINGS_FILENAME)
+            if os.path.isfile(path):
+                try:
+                    with open(path, 'r') as fh:
+                        data = json.load(fh)
+                    return SyncSettings.from_dict(data)
+                except Exception:
+                    pass
+        return SyncSettings()
+
+
+    def _save_settings(settings):
+        """Write .cds-st-sync.json to the current directory."""
         proj_dir = os.getcwd()
-
-    path = os.path.join(proj_dir, _SETTINGS_FILENAME)
-    if os.path.isfile(path):
-        try:
-            with open(path, 'r') as fh:
-                data = json.load(fh)
-            return SyncSettings.from_dict(data)
-        except Exception:
-            pass
-    return SyncSettings()
-
-
-def _save_settings(settings):
-    """Write .cds-st-sync.json to the project folder."""
-    try:
-        proj_path = str(projects.primary)
-        proj_dir = os.path.dirname(proj_path.replace('Project: ', ''))
-    except Exception:
-        proj_dir = os.getcwd()
-
-    if not os.path.isdir(proj_dir):
-        os.makedirs(proj_dir)
-
-    path = os.path.join(proj_dir, _SETTINGS_FILENAME)
-    data = settings.to_dict()
-    with open(path, 'w') as fh:
-        json.dump(data, fh, indent=2)
-
+        path = os.path.join(proj_dir, _SETTINGS_FILENAME)
+        data = settings.to_dict()
+        with open(path, 'w') as fh:
+            json.dump(data, fh, indent=2)
 
 if __name__ == '__main__':
     main()
