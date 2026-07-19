@@ -8,15 +8,6 @@ class SyncSettings(object):
     """Persistent synchronisation settings.
 
     Stored as .cds-st-sync.json (CodeSys side) or QSettings (GUI side).
-
-    Attributes:
-        sync_dir: str – absolute or relative path to the sync root.
-        filter: ObjectFilter – which object types to include.
-        pipe_name: str – Named Pipe name.
-        pipe_timeout: int – connection timeout in seconds.
-        live_sync_enabled: bool – start live-sync on connect.
-        poll_interval: int – daemon poll interval in seconds.
-        conflict_strategy: str – 'last_write_wins'.
     """
 
     DEFAULT_PIPE_NAME = 'cds-st-sync-default'
@@ -26,7 +17,8 @@ class SyncSettings(object):
     def __init__(self, sync_dir='', filter_obj=None,
                  pipe_name=None, pipe_timeout=None,
                  live_sync_enabled=False, poll_interval=None,
-                 conflict_strategy='last_write_wins'):
+                 conflict_strategy='last_write_wins',
+                 use_virtual_folders=False):
         self.sync_dir = sync_dir or './sync/'
         self.filter = filter_obj if filter_obj is not None else ObjectFilter()
         self.pipe_name = pipe_name or self.DEFAULT_PIPE_NAME
@@ -40,8 +32,7 @@ class SyncSettings(object):
             else self.DEFAULT_POLL_INTERVAL
         )
         self.conflict_strategy = conflict_strategy or 'last_write_wins'
-
-    # ── serialisation ─────────────────────────────────────────────────
+        self.use_virtual_folders = bool(use_virtual_folders)
 
     def to_dict(self):
         """Return a JSON-serialisable dict."""
@@ -60,6 +51,7 @@ class SyncSettings(object):
             'live_sync_enabled': self.live_sync_enabled,
             'poll_interval': self.poll_interval,
             'conflict_strategy': self.conflict_strategy,
+            'use_virtual_folders': self.use_virtual_folders,
         }
 
     @classmethod
@@ -82,9 +74,11 @@ class SyncSettings(object):
             live_sync_enabled=data.get('live_sync_enabled', False),
             poll_interval=data.get('poll_interval'),
             conflict_strategy=data.get('conflict_strategy', 'last_write_wins'),
+            use_virtual_folders=data.get('use_virtual_folders', False),
         )
 
     def __repr__(self):
         return ('SyncSettings(sync_dir={0!r}, pipe={1!r}, '
-                'live_sync={2})').format(
-            self.sync_dir, self.pipe_name, self.live_sync_enabled)
+                'live_sync={2}, virtual_folders={3})').format(
+            self.sync_dir, self.pipe_name,
+            self.live_sync_enabled, self.use_virtual_folders)

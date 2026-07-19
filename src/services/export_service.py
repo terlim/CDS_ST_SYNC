@@ -27,14 +27,10 @@ def _infer_kind(obj):
 
 
 def _is_collapsed_parent(obj):
-    """Return True if obj is a code object (POU/Interface/Property), not a folder.
-    
-    Folders have NO declaration_text. Code objects (even empty) have it.
-    """
+    """Return True if obj is a code object (POU/Interface/Property), not a folder."""
     native = getattr(obj, '_native', None)
     if native is None:
         return False
-    # Has textual_declaration → it's code, not a folder
     return getattr(native, 'textual_declaration', None) is not None
 
 
@@ -42,12 +38,13 @@ class ExportService(IExportService):
     """Orchestrates ST code export: CodeSys objects -> .st files on disk."""
 
     def __init__(self, bridge, extractor, storage, formatter,
-                 progress_callback=None):
+                 progress_callback=None, use_virtual_folders=False):
         self._bridge = bridge
         self._extractor = extractor
         self._storage = storage
         self._formatter = formatter
         self._progress = progress_callback
+        self._use_virtual_folders = use_virtual_folders
 
     def export(self, filter_obj):
         """Run the export."""
@@ -60,7 +57,6 @@ class ExportService(IExportService):
             result.add_error('', '', 'get_all_objects failed: ' + str(exc))
             return result
 
-        # Classify: keep objects that have textual_declaration
         textual = []
         for obj in all_objects:
             decl = getattr(obj, 'declaration_text', None)
@@ -69,7 +65,6 @@ class ExportService(IExportService):
             kind = _infer_kind(obj) or 'pou'
             textual.append((obj, kind))
 
-        # Apply filter
         filtered = []
         skipped = 0
         for obj, kind in textual:
@@ -88,20 +83,16 @@ class ExportService(IExportService):
             result.success = True
             return result
 
-        # Export each object
         manifest = Manifest()
         completed = 0
         for idx, (obj, kind, meta) in enumerate(filtered, 1):
             try:
                 declaration = self._extract_st_declaration(obj)
                 implementation = self._extract_st_implementation(obj, kind)
-
                 meta.compute_sha1(declaration, implementation)
                 self._storage.save_object(meta, declaration, implementation)
-
                 manifest.add_object(meta)
                 completed += 1
-
                 if self._progress:
                     self._progress(idx, total, meta.name)
             except Exception as exc:
@@ -113,7 +104,6 @@ class ExportService(IExportService):
                     self._progress(idx, total,
                                    getattr(meta, 'name', '?') + ' (error)')
 
-        # Progress for skipped
         if self._progress:
             for i in range(len(filtered) + 1, total + 1):
                 self._progress(i, total, '(skipped)')
@@ -136,9 +126,7 @@ class ExportService(IExportService):
         pou_kind = None
         if kind == 'pou':
             pou_kind = self._infer_pou_kind(obj)
-
         path, output_name = self._build_path_and_name(obj, kind)
-
         return ObjectMeta(
             guid=obj.guid,
             name=output_name or obj.name,
@@ -150,9 +138,7 @@ class ExportService(IExportService):
     def _build_path_and_name(self, obj, kind):
         """Build path[] and optionally a flat name for POU children.
 
-        Returns (path, output_name):
-            path: folder names from virtual root to container
-            output_name: None for normal objects, 'Parent.Child' for POU children
+        Returns (path, output_name).
         """
         parts = []
         visited = set()
@@ -165,7 +151,6 @@ class ExportService(IExportService):
                 parent = current.parent
             except Exception:
                 parent = None
-
             if parent is None:
                 break
 
@@ -182,12 +167,16 @@ class ExportService(IExportService):
             pname = getattr(parent, 'name', '')
             if pname and 'Project(' not in str(pname) and 'stPath=' not in str(pname):
                 if _is_collapsed_parent(parent):
-                    # Collapsed: chain flat names Parent.Child
-                    cname = child_name or getattr(current, 'name', '')
-                    if output_name:
-                        output_name = str(pname) + '.' + output_name
+                    if self._use_virtual_folders:
+                        # Virtual folder: parent becomes a path component
+                        parts.append(str(pname))
                     else:
-                        output_name = str(pname) + '.' + str(cname)
+                        # Flat: chain Parent.Child
+                        cname = child_name or getattr(current, 'name', '')
+                        if output_name:
+                            output_name = str(pname) + '.' + output_name
+                        else:
+                            output_name = str(pname) + '.' + str(cname)
                 else:
                     parts.append(str(pname))
 
@@ -196,13 +185,12 @@ class ExportService(IExportService):
 
         parts.reverse()
 
-        # Virtual root grouping: everything not under 'Device' goes to 'POUs'
+        # Virtual root: non-Device → POUs
         if parts:
             first = parts[0]
             if first != 'Device' and first != 'POUs':
                 parts.insert(0, 'POUs')
         elif not output_name:
-            # Root-level object without folder path
             virtual = {
                 'pou': 'POUs',
                 'gvl': 'Global Vars',
@@ -226,8 +214,6 @@ class ExportService(IExportService):
         if text.startswith('FUNCTION'):
             return 'function'
         return 'program'
-
-    # ── Text extraction ────────────────────────────────────────────────
 
     def _extract_st_declaration(self, obj):
         text = self._extractor.extract_declaration(obj)

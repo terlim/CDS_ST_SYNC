@@ -176,6 +176,16 @@ def main():
             setattr(filt, attr, ans == PromptResult.Yes)
         settings.filter = filt
 
+        # 2b. Virtual folders option
+        vf_choice = system.ui.prompt(
+            'Create virtual folders for POU children?\n\n'
+            'Yes = fb_MenuItem/p_Background.st (readable)\n'
+            'No  = fb_MenuItem.p_Background.st (flat)',
+            PromptChoice.YesNo,
+            PromptResult.Yes
+        )
+        settings.use_virtual_folders = (vf_choice == PromptResult.Yes)
+
     # 3. Save
     _save_settings(settings)
     msg = (
