@@ -196,8 +196,13 @@ class ExportService(IExportService):
 
         parts.reverse()
 
-        # Virtual grouping for root-level objects
-        if not parts and not output_name:
+        # Virtual root grouping: everything not under 'Device' goes to 'POUs'
+        if parts:
+            first = parts[0]
+            if first != 'Device' and first != 'POUs':
+                parts.insert(0, 'POUs')
+        elif not output_name:
+            # Root-level object without folder path
             virtual = {
                 'pou': 'POUs',
                 'gvl': 'Global Vars',
