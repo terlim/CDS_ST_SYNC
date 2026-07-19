@@ -70,7 +70,8 @@ def main():
 
     # Build services
     try:
-        project = projects.primary
+        import __main__ as _main
+        project = _main.projects.primary
         bridge = CodeSysBridge(project)
     except Exception as exc:
         system.ui.error('Cannot access project: {0}'.format(str(exc)))

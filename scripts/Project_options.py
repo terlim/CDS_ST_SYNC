@@ -55,7 +55,20 @@ def _choose_folder_dialog(title):
 
 def _get_project_dir():
     """Return the directory containing the open CodeSys project, or None."""
-    proj = projects.primary
+    # 'projects' is a CodeSys global — access via __main__
+    import __main__
+    proj = getattr(__main__, 'projects', None)
+    if proj is None:
+        # Also try direct global access
+        try:
+            proj = projects
+        except NameError:
+            pass
+    if proj is None:
+        return None
+    proj = proj.primary
+    if proj is None:
+        return None
     # Try direct .path attribute (most reliable)
     for attr in ('path', 'file_path', 'project_path', 'project_file'):
         val = getattr(proj, attr, None)
