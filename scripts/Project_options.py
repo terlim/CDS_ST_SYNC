@@ -65,10 +65,11 @@ def main():
         'Export object types:\n'
         '  Yes = ALL textual types (POU, GVL, DUT, Interface)\n'
         '  No  = choose individually',
-        'YesNo', 'Yes'
+        PromptChoice.YesNo,
+        PromptResult.Yes
     )
 
-    if choice == 'Yes':
+    if choice == PromptResult.Yes:
         settings.filter = ObjectFilter.all_on()
     else:
         filt = ObjectFilter()
@@ -80,8 +81,12 @@ def main():
             ('Persistent Variables', 'include_persistent'),
             ('Task-local GVL', 'include_task_local'),
         ]:
-            ans = system.ui.prompt('Include {0}?'.format(label), 'YesNo', 'Yes')
-            setattr(filt, attr, ans == 'Yes')
+            ans = system.ui.prompt(
+                'Include {0}?'.format(label),
+                PromptChoice.YesNo,
+                PromptResult.Yes
+            )
+            setattr(filt, attr, ans == PromptResult.Yes)
         settings.filter = filt
 
     # 3. Summary
