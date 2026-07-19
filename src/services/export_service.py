@@ -200,6 +200,14 @@ class ExportService(IExportService):
             if virtual:
                 parts.append(virtual)
 
+
+        # Virtual folders: POU itself goes inside its own folder
+        if self._use_virtual_folders and not output_name:
+            native = getattr(obj, '_native', None)
+            if native is not None:
+                has_impl = getattr(native, 'textual_implementation', None) is not None
+                if has_impl:
+                    parts.append(obj.name)
         return parts, output_name
 
     @staticmethod
