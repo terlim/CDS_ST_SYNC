@@ -27,15 +27,15 @@ def _infer_kind(obj):
 
 
 def _is_collapsed_parent(obj):
-    """Return True if obj is a POU (has textual_implementation → code, not a folder).
+    """Return True if obj is a code object (POU/Interface/Property), not a folder.
     
-    Checks the NATIVE object for textual_implementation presence,
-    not the content (empty impl still means it's a POU).
+    Folders have NO declaration_text. Code objects (even empty) have it.
     """
     native = getattr(obj, '_native', None)
     if native is None:
         return False
-    return getattr(native, 'textual_implementation', None) is not None
+    # Has textual_declaration → it's code, not a folder
+    return getattr(native, 'textual_declaration', None) is not None
 
 
 class ExportService(IExportService):
@@ -182,9 +182,12 @@ class ExportService(IExportService):
             pname = getattr(parent, 'name', '')
             if pname and 'Project(' not in str(pname) and 'stPath=' not in str(pname):
                 if _is_collapsed_parent(parent):
-                    # Collapsed: build flat name ParentName.ChildName
+                    # Collapsed: chain flat names Parent.Child
                     cname = child_name or getattr(current, 'name', '')
-                    output_name = str(pname) + '.' + str(cname)
+                    if output_name:
+                        output_name = str(pname) + '.' + output_name
+                    else:
+                        output_name = str(pname) + '.' + str(cname)
                 else:
                     parts.append(str(pname))
 
