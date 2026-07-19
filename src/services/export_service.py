@@ -27,7 +27,15 @@ def _infer_kind(obj):
 
 
 def _is_collapsed_parent(obj):
-    """Return True if obj is a code object (POU/Interface/Property), not a folder."""
+    """Return True for any code object (POU/property/method) — for flat chaining."""
+    native = getattr(obj, '_native', None)
+    if native is None:
+        return False
+    return getattr(native, 'textual_declaration', None) is not None
+
+
+def _is_pou(obj):
+    """Return True only for real POUs (have textual_implementation) — for virtual folders."""
     native = getattr(obj, '_native', None)
     if native is None:
         return False
@@ -167,7 +175,7 @@ class ExportService(IExportService):
             pname = getattr(parent, 'name', '')
             if pname and 'Project(' not in str(pname) and 'stPath=' not in str(pname):
                 if _is_collapsed_parent(parent):
-                    if self._use_virtual_folders:
+                    if self._use_virtual_folders and _is_pou(parent):
                         # Virtual folder: parent becomes a path component
                         parts.append(str(pname))
                     else:
@@ -205,7 +213,7 @@ class ExportService(IExportService):
         if self._use_virtual_folders and not output_name:
             native = getattr(obj, '_native', None)
             if native is not None:
-                has_impl = getattr(native, 'textual_implementation', None) is not None
+                has_impl = _is_pou(obj)
                 if has_impl:
                     parts.append(obj.name)
         return parts, output_name
