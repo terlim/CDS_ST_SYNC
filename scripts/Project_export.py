@@ -95,7 +95,8 @@ def main():
         print('  [{0}/{1}] {2}'.format(current, total, name))
 
     export_svc = ExportService(bridge, extractor, storage, formatter,
-                               progress_callback=progress_callback)
+                               progress_callback=progress_callback,
+                               use_virtual_folders=settings.use_virtual_folders)
 
     print('Exporting...')
     print('')
