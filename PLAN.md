@@ -365,18 +365,20 @@ END_VAR
 
 ## 8. Этапы разработки
 
-### Этап 1: Ядро (общие модули)
-- [ ] `cds_bootstrap.py` — загрузчик
-- [ ] `cds_settings.py` — настройки .cds-st-sync.json
-- [ ] `cds_export.py` — ядро экспорта с сохранением иерархии
-- [ ] `cds_import.py` — ядро импорта с созданием папок
-- [ ] `cds_timestamps.py` — timestamp-ы объектов
+### Этап 1: Ядро (общие модули) ✅
+- [x] `cds_bootstrap.py` — загрузчик
+- [x] `cds_settings.py` — настройки .cds-st-sync.json
+- [x] `cds_export.py` — ядро экспорта с сохранением иерархии
+- [x] `cds_import.py` — ядро импорта с созданием папок
+- [x] `cds_timestamps.py` — timestamp-ы объектов
 
-### Этап 2: Автономные скрипты (режим B)
-- [ ] `Project_options.py`
-- [ ] `Project_export.py`
-- [ ] `Project_import.py`
-- [ ] Тестирование на amosova_v3
+### Этап 2: Автономные скрипты (режим B) ✅
+- [x] `Project_options.py`
+- [x] `Project_export.py`
+- [x] `Project_import.py`
+- [x] Тестирование на amosova_v3
+- [ ] **TODO: проверка всех типов текстовых объектов на выгрузку**
+- [ ] **TODO: скрытый маркер для виртуальных папок в manifest (для упрощения импорта)**
 
 ### Этап 3: Демон (режим A)
 - [ ] `daemon_loop.py` — цикл, pipe, dispatch
