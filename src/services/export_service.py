@@ -213,7 +213,7 @@ class ExportService(IExportService):
         if self._use_virtual_folders and not output_name:
             native = getattr(obj, '_native', None)
             if native is not None:
-                has_impl = _is_pou(obj)
+                has_impl = _is_collapsed_parent(obj)
                 if has_impl:
                     parts.append(obj.name)
         return parts, output_name
