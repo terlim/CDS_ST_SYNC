@@ -5,8 +5,8 @@ import os
 import tempfile
 import xml.etree.ElementTree as ET
 
-from src.interfaces.bridge import ICodeSysBridge
-from src.infrastructure.codesys_object import (
+from interfaces.bridge import ICodeSysBridge
+from infrastructure.codesys_object import (
     CodeSysObjectProxy,
     _to_guid_str,
     _to_system_guid,
@@ -14,8 +14,8 @@ from src.infrastructure.codesys_object import (
     _find_dut_type_enum,
     _extract_return_type,
 )
-from src.domain.models import ProjectTree, OperationResult
-from src.domain.filter import classify_type_guid
+from domain.models import ProjectTree, OperationResult
+from domain.filter import classify_type_guid
 
 
 class CodeSysBridge(ICodeSysBridge):

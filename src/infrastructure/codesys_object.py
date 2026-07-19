@@ -93,7 +93,7 @@ def _to_system_guid(guid_string):
 
 # ── CodeSysObjectProxy ───────────────────────────────────────────────────
 
-from src.interfaces.bridge import ICodeSysObject
+from interfaces.bridge import ICodeSysObject
 
 
 class CodeSysObjectProxy(ICodeSysObject):
