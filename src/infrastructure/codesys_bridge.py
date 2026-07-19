@@ -45,11 +45,12 @@ class CodeSysBridge(ICodeSysBridge):
     def get_all_objects(self):
         """Return flat list of all CodeSysObjectProxy in the project."""
         if self._project is None:
-            return []
+            print('[bridge] project is None'); return []
         try:
             natives = self._project.get_children(recursive=True)
-        except Exception:
-            return []
+            print('[bridge] get_children returned {0} objects'.format(len(natives) if natives else 0))
+        except Exception as exc:
+            print('[bridge] get_children failed: ' + str(exc)); return []
         return [CodeSysObjectProxy(obj) for obj in (natives or [])]
 
     def get_object_by_guid(self, guid):
@@ -149,7 +150,7 @@ class CodeSysBridge(ICodeSysBridge):
                 result = native_parent.create_folder(name)
                 if result is not None:
                     return CodeSysObjectProxy(result)
-            except Exception:
+            except Exception as exc:
                 pass
 
         # Fallback: create_child with folder type GUID
@@ -160,7 +161,7 @@ class CodeSysBridge(ICodeSysBridge):
                 result = native_parent.create_child(name, guid_obj)
                 if result is not None:
                     return CodeSysObjectProxy(result)
-            except Exception:
+            except Exception as exc:
                 pass
 
         raise RuntimeError('Cannot create folder: {0}'.format(name))
@@ -176,7 +177,7 @@ class CodeSysBridge(ICodeSysBridge):
 
         try:
             objects = self._project.get_children(recursive=True)
-        except Exception:
+        except Exception as exc:
             return result
 
         if not objects:
@@ -203,17 +204,17 @@ class CodeSysBridge(ICodeSysBridge):
                     elif child_name == 'Timestamp' and child.text:
                         try:
                             ts_text = int(child.text)
-                        except Exception:
+                        except Exception as exc:
                             pass
                 if guid_text and ts_text is not None:
                     result[guid_text] = ts_text
-        except Exception:
+        except Exception as exc:
             pass
         finally:
             if os.path.exists(tmp_path):
                 try:
                     os.remove(tmp_path)
-                except Exception:
+                except Exception as exc:
                     pass
 
         return result
@@ -302,7 +303,7 @@ def _set_text_document(doc, value):
         try:
             doc.text = value
             return
-        except Exception:
+        except Exception as exc:
             pass
     if hasattr(doc, 'replace'):
         doc.replace(value)
