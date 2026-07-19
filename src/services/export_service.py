@@ -222,7 +222,7 @@ class ExportService(IExportService):
             visited.add(pguid)
 
             pname = getattr(parent, 'name', '')
-            if pname:
+            if pname and "Project(" not in str(pname) and "stPath=" not in str(pname):
                 parts.append(str(pname))
 
             current = parent
