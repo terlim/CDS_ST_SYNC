@@ -97,30 +97,13 @@ from interfaces.bridge import ICodeSysObject
 
 
 class CodeSysObjectProxy(ICodeSysObject):
-    """Thin wrapper around a native CodeSys script object.
-
-    All access to the IronPython object is routed through this proxy.
-    Every other class in the system works exclusively with this proxy,
-    never with the native object directly.
-
-    The native CodeSys object exposes attributes such as::
-
-        obj.guid                  → System.Guid
-        obj.name / obj.get_name() → str
-        obj.parent                → native object or None
-        obj.type_guid             → System.Guid
-        obj.textual_declaration   → ITextDocument or missing
-        obj.textual_implementation→ ITextDocument or missing
-        obj.get_children(False)   → list of native objects
-    """
+    """Thin wrapper around a native CodeSys script object."""
 
     def __init__(self, native_object):
         self._native = native_object
         self._guid = None
         self._name = None
         self._type_guid = None
-
-    # ── properties ───────────────────────────────────────────────────────
 
     @property
     def guid(self):
@@ -181,7 +164,13 @@ class CodeSysObjectProxy(ICodeSysObject):
             return []
         return [CodeSysObjectProxy(child) for child in (native_children or [])]
 
-    # ── dunder ───────────────────────────────────────────────────────────
+    @property
+    def parent(self):
+        """Return parent proxy or None for root objects."""
+        native_parent = getattr(self._native, 'parent', None)
+        if native_parent is None:
+            return None
+        return CodeSysObjectProxy(native_parent)
 
     def __repr__(self):
         return 'CodeSysObjectProxy(name={0.name!r}, guid={0.guid!r})'.format(self)
