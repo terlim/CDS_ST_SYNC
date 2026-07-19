@@ -27,9 +27,15 @@ def _infer_kind(obj):
 
 
 def _is_collapsed_parent(obj):
-    """Return True if obj is a POU (has implementation → code, not a folder)."""
-    impl = getattr(obj, 'implementation_text', None)
-    return impl is not None
+    """Return True if obj is a POU (has textual_implementation → code, not a folder).
+    
+    Checks the NATIVE object for textual_implementation presence,
+    not the content (empty impl still means it's a POU).
+    """
+    native = getattr(obj, '_native', None)
+    if native is None:
+        return False
+    return getattr(native, 'textual_implementation', None) is not None
 
 
 class ExportService(IExportService):
