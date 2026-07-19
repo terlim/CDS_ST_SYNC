@@ -31,7 +31,7 @@ def _is_collapsed_parent(obj):
     native = getattr(obj, '_native', None)
     if native is None:
         return False
-    return getattr(native, 'textual_declaration', None) is not None
+    return getattr(native, 'textual_implementation', None) is not None
 
 
 class ExportService(IExportService):
