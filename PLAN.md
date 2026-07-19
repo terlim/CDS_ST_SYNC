@@ -379,6 +379,10 @@ END_VAR
 - [x] Тестирование на amosova_v3
 - [ ] **TODO: проверка всех типов текстовых объектов на выгрузку**
 - [ ] **TODO: скрытый маркер для виртуальных папок в manifest (для упрощения импорта)**
+  - Поле `virtual_folders: list[str]` в ObjectMeta
+  - ExportService заполняет при virtual-режиме
+  - ImportService._ensure_container() пропускает виртуальные папки
+  - Старые манифесты: `[]` по умолчанию
 
 ### Этап 3: Демон (режим A)
 - [ ] `daemon_loop.py` — цикл, pipe, dispatch
