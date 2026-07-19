@@ -175,7 +175,7 @@ class ExportService(IExportService):
             pname = getattr(parent, 'name', '')
             if pname and 'Project(' not in str(pname) and 'stPath=' not in str(pname):
                 if _is_collapsed_parent(parent):
-                    if self._use_virtual_folders and _is_pou(parent):
+                    if self._use_virtual_folders:
                         # Virtual folder: parent becomes a path component
                         parts.append(str(pname))
                     else:
