@@ -55,7 +55,9 @@ def _choose_folder_dialog(title):
 
 def _load_settings():
     """Read .cds-st-sync.json, or return defaults."""
-    for base in (os.getcwd(), os.path.dirname(os.path.abspath(__file__))):
+    # Try: current dir, script dir, then parent of script dir
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    for base in (os.getcwd(), script_dir, os.path.dirname(script_dir)):
         path = os.path.join(base, _SETTINGS_FILENAME)
         if os.path.isfile(path):
             try:
@@ -68,8 +70,10 @@ def _load_settings():
 
 
 def _save_settings(settings):
-    """Write .cds-st-sync.json to the current directory."""
-    proj_dir = os.getcwd()
+    """Write .cds-st-sync.json next to this script."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Go up one level to project root (scripts/ → CDS_ST_SYNC/)
+    proj_dir = os.path.dirname(script_dir)
     path = os.path.join(proj_dir, _SETTINGS_FILENAME)
     data = settings.to_dict()
     with open(path, 'w') as fh:
