@@ -27,7 +27,7 @@ _scripts_dir = os.path.join(_project_root, 'scripts')
 if os.path.isdir(_scripts_dir) and _scripts_dir not in _sys.path:
     _sys.path.insert(0, _scripts_dir)
 
-from Project_options import _load_settings
+from Project_options import _load_settings, _get_project_dir
 
 try:
     from src.infrastructure.codesys_bridge import CodeSysBridge
@@ -41,6 +41,16 @@ except ImportError:
     from services.import_service import ImportService
 
 
+def _resolve_sync_dir(sync_dir):
+    """Resolve sync_dir: absolute path stays, relative resolved to project dir."""
+    if os.path.isabs(sync_dir):
+        return sync_dir
+    proj_dir = _get_project_dir()
+    if proj_dir:
+        return os.path.normpath(os.path.join(proj_dir, sync_dir))
+    return os.path.abspath(sync_dir)
+
+
 def main():
     """Entry point — called by CodeSys ScriptEngine."""
     print('=' * 50)
@@ -48,7 +58,6 @@ def main():
     print('=' * 50)
     print('')
 
-    # Load settings
     settings = _load_settings()
     sync_dir = settings.sync_dir
 
@@ -59,9 +68,9 @@ def main():
         )
         return
 
+    sync_dir = _resolve_sync_dir(sync_dir)
     print('Sync directory: {0}'.format(sync_dir))
 
-    # Verify manifest exists
     manifest_path = os.path.join(sync_dir, 'manifest.json')
     if not os.path.exists(manifest_path):
         system.ui.error(
@@ -76,7 +85,6 @@ def main():
         dut=filt.include_dut, itf=filt.include_interface))
     print('')
 
-    # Build services
     try:
         import __main__ as _main
         project = _main.projects.primary
@@ -98,7 +106,6 @@ def main():
     print('')
     result = import_svc.import_(filt)
 
-    # Report
     print('')
     print('-' * 50)
     print('Import finished.')
