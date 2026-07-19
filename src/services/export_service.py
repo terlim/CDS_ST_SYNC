@@ -42,6 +42,20 @@ def _is_pou(obj):
     return getattr(native, 'textual_implementation', None) is not None
 
 
+def _has_code_children(obj):
+    """Return True if obj has child code objects."""
+    try:
+        children = obj.children
+    except Exception:
+        return False
+    for child in (children or []):
+        native = getattr(child, '_native', None)
+        if native is not None:
+            if getattr(native, 'textual_declaration', None) is not None:
+                return True
+    return False
+
+
 class ExportService(IExportService):
     """Orchestrates ST code export: CodeSys objects -> .st files on disk."""
 
@@ -213,8 +227,8 @@ class ExportService(IExportService):
         if self._use_virtual_folders and not output_name:
             native = getattr(obj, '_native', None)
             if native is not None:
-                has_impl = _is_collapsed_parent(obj)
-                if has_impl:
+                has_children = _is_collapsed_parent(obj) and _has_code_children(obj)
+                if has_children:
                     parts.append(obj.name)
         return parts, output_name
 
