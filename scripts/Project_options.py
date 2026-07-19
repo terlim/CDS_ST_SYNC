@@ -50,9 +50,7 @@ def main():
     settings = _load_settings()
 
     # 1. Sync directory
-    current = settings.sync_dir or os.path.dirname(
-        str(projects.primary).replace('Project: ', '')
-    )
+        current = settings.sync_dir or os.path.join(os.getcwd(), 'sync')
     new_dir = system.ui.query_string(
         'Sync directory (relative to project folder):',
         current
