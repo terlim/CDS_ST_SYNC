@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 
-class ICodeSysObject(ABC):
+class ICodeSysObject(object):
+    __metaclass__ = ABCMeta
     """Interface for a single CodeSys project object.
 
     Attributes (read-only):
@@ -53,7 +54,8 @@ class ICodeSysObject(ABC):
         """Return a list of immediate child ICodeSysObject instances."""
 
 
-class IObjectReader(ABC):
+class IObjectReader(object):
+    __metaclass__ = ABCMeta
     """Read-only access to the CodeSys project tree."""
 
     @abstractmethod
@@ -73,7 +75,8 @@ class IObjectReader(ABC):
         """Return a ProjectTree representing the full hierarchy."""
 
 
-class IObjectWriter(ABC):
+class IObjectWriter(object):
+    __metaclass__ = ABCMeta
     """Write access to the CodeSys project."""
 
     @abstractmethod
@@ -136,7 +139,8 @@ class IObjectWriter(ABC):
         """
 
 
-class ITimestampReader(ABC):
+class ITimestampReader(object):
+    __metaclass__ = ABCMeta
     """Time-stamp reading for live-sync."""
 
     @abstractmethod

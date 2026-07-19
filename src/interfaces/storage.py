@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 
-class IStorage(ABC):
+class IStorage(object):
+    __metaclass__ = ABCMeta
     """Storage abstraction for .st files and manifest.json.
 
     Implementations can write to the local file system, in-memory

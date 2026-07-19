@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 
 # ── Sync actions for conflict resolution ──────────────────────────────
 
 class SyncAction(object):
+    __metaclass__ = ABCMeta
     """Enumeration of possible sync conflict actions."""
 
     EXPORT_TO_FILE = 'export_to_file'
@@ -23,7 +24,8 @@ class SyncAction(object):
 
 # ── Service interfaces ────────────────────────────────────────────────
 
-class IExportService(ABC):
+class IExportService(object):
+    __metaclass__ = ABCMeta
     """Exports textual CodeSys objects to .st files on disk."""
 
     @abstractmethod
@@ -37,7 +39,8 @@ class IExportService(ABC):
         """
 
 
-class IImportService(ABC):
+class IImportService(object):
+    __metaclass__ = ABCMeta
     """Imports .st files from disk back into CodeSys objects."""
 
     @abstractmethod
@@ -51,7 +54,8 @@ class IImportService(ABC):
         """
 
 
-class IConflictResolver(ABC):
+class IConflictResolver(object):
+    __metaclass__ = ABCMeta
     """Resolves conflicts between IDE and file versions."""
 
     @abstractmethod
@@ -67,7 +71,8 @@ class IConflictResolver(ABC):
         """
 
 
-class ILiveSyncService(ABC):
+class ILiveSyncService(object):
+    __metaclass__ = ABCMeta
     """Continuous auto-sync between CodeSys and file system."""
 
     @abstractmethod

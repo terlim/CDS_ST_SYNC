@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 
-class ITextExtractor(ABC):
+class ITextExtractor(object):
+    __metaclass__ = ABCMeta
     """Extract Structured Text from a CodeSys object."""
 
     @abstractmethod
@@ -29,7 +30,8 @@ class ITextExtractor(ABC):
         """
 
 
-class ITextFormatter(ABC):
+class ITextFormatter(object):
+    __metaclass__ = ABCMeta
     """Format and parse .st file content."""
 
     @abstractmethod
