@@ -6,6 +6,31 @@ from domain.models import Manifest, ObjectMeta, OperationResult
 from domain.filter import classify_type_guid
 
 
+
+def _infer_kind(obj):
+    """Infer object kind from its declaration text rather than type_guid.
+
+    type_guid is not directly accessible on IronPython CodeSys objects.
+    Instead we inspect the declaration_text content.
+    """
+    decl = getattr(obj, 'declaration_text', None) or ""
+    if not decl:
+        return None
+    upper = decl.strip().upper()
+    if 'VAR_GLOBAL' in upper or 'VAR_GLOBAL CONSTANT' in upper:
+        return 'gvl'
+    if upper.startswith('TYPE'):
+        return 'dut'
+    if upper.startswith('INTERFACE'):
+        return 'interface'
+    if upper.startswith('FUNCTION_BLOCK'):
+        return 'pou'
+    if upper.startswith('FUNCTION'):
+        return 'pou'
+    if upper.startswith('PROGRAM'):
+        return 'pou'
+    return 'pou'  # default
+
 class ExportService(IExportService):
     """Orchestrates ST code export: CodeSys objects → .st files on disk.
 
@@ -40,17 +65,9 @@ class ExportService(IExportService):
     # ── Public API ──────────────────────────────────────────────────────
 
     def export(self, filter_obj):
-        """Run the export.
-
-        Args:
-            filter_obj: ObjectFilter – which object types to export.
-
-        Returns:
-            OperationResult
-        """
+        """Run the export."""
         result = OperationResult()
 
-        # 1. Retrieve all CodeSys objects.
         try:
             all_objects = self._bridge.get_all_objects()
         except Exception as exc:
@@ -58,12 +75,17 @@ class ExportService(IExportService):
             result.add_error('', '', 'bridge.get_all_objects() failed: ' + str(exc))
             return result
 
-        # 2. Classify: keep only textual objects.
+        # Classify: keep objects that have textual_declaration
         textual = []
         for obj in all_objects:
-            kind = classify_type_guid(obj.type_guid)
-            if kind is not None:
-                textual.append((obj, kind))
+            decl = getattr(obj, 'declaration_text', None)
+            # Also try direct attribute check on underlying object
+            if decl is None:
+                continue
+            kind = _infer_kind(obj)
+            if kind is None:
+                kind = 'pou'  # fallback
+            textual.append((obj, kind))
 
         # 3. Apply filter.
         filtered = []
