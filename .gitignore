@@ -1,0 +1,104 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+dist/
+build/
+out/
+*.o
+*.class
+*.dll
+*.exe
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+
+# Coverage
+coverage/
+*.lcov
+
+# ──────────────────────────────────────────
+# AI / Agent files — НЕ КОММИТИТЬ в публичный репозиторий
+# Никто не должен знать, что над проектом работает AI
+# ──────────────────────────────────────────
+
+# Pi coding agent
+.pi/
+.pi-subagents/
+
+# Claude / Claude Code
+CLAUDE.md
+.claude/
+
+# Cursor AI
+.cursor/
+.cursorrules
+.cursorignore
+
+# GitHub Copilot
+.github/copilot-instructions.md
+.github/copilot-workspace/
+
+# Windsurf
+.windsurfrules
+.windsurf/
+
+# Roo Code / Cline
+.roo/
+.cline/
+.clinerules
+
+# Aider
+.aider*
+.aider.conf.yml
+.aiderignore
+
+# Codex
+.codex/
+
+# Open Interpreter
+.open-interpreter/
+
+# Amazon Q
+.amazonq/
+
+# Continue.dev
+.continue/
+
+# Cody (Sourcegraph)
+.cody/
+
+# Supermaven
+.supermaven/
+
+# Tabnine
+.tabnine/
+
+# Generic AI agent context files (если решите использовать)
+AGENTS.md
+AI.md
+CONTEXT.md
